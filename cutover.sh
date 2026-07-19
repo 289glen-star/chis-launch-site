@@ -29,6 +29,13 @@ printf '%s\n' "$DOMAIN" > CNAME
 gh api -X PUT "repos/$REPO/pages" -f "cname=$DOMAIN" >/dev/null 2>&1 || true
 
 echo "==> 3/5  Making the site indexable (staging protection off)"
+python3 - <<'GUARD'
+import sys
+h=open("index.html").read()
+if "Pre-launch checklist" in h:
+    sys.exit("ABORT: internal pre-launch checklist still present in index.html")
+GUARD
+
 python3 - <<'PY'
 import re
 h = open("index.html").read()
